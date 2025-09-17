@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>San Juan Ára - El Videojuego</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Oxanium:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Libraries -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'fire': '#FF4500',
+            'ember': '#FF7518',
+            'ash': '#121212',
+            'glow': '#FF9D42',
+            'char': '#1A1A1A',
+          },
+          fontFamily: {
+            'orbitron': ['Orbitron', 'sans-serif'],
+            'oxanium': ['Oxanium', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+            'pulse-slow': 'pulse 4s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        },
+      },
+    }
+  </script>
+  
+  <style id="app-style">
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    :root {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      background-color: #0A0A0A;
+      overflow-x: hidden;
+      color: #FFF;
+    }
+    
+    .section {
+      min-height: 100vh;
+      position: relative;
+      scroll-margin-top: 60px;
+      overflow: hidden;
+    }
+    
+    /* Particle effects */
+    .ember-particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .ember {
+      position: absolute;
+      border-radius: 50%;
+      background-color: #FF4500;
+      opacity: 0.6;
+      filter: blur(2px);
+      box-shadow: 0 0 10px 2px rgba(255, 69, 0, 0.7);
+      animation: float-up linear forwards;
+    }
+    
+    @keyframes float-up {
+      0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.6;
+      }
+      100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #0A0A0A;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #FF4500;
+      border-radius: 3px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #FF7518;
+    }
+    
+    /* Glow effects */
+    .text-glow {
+      text-shadow: 0 0 10px rgba(255, 157, 66, 0.7), 0 0 20px rgba(255, 69, 0, 0.5);
+    }
+    
+    .btn-glow {
+      box-shadow: 0 0 15px rgba(255, 69, 0, 0.7), 0 0 30px rgba(255, 157, 66, 0.4);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-glow:hover {
+      box-shadow: 0 0 20px rgba(255, 69, 0, 0.9), 0 0 40px rgba(255, 157, 66, 0.6);
+      transform: scale(1.05);
+    }
+    
+    .card-glow {
+      transition: all 0.3s ease;
+    }
+    
+    .card-glow:hover {
+      box-shadow: 0 0 15px rgba(255, 69, 0, 0.7), 0 0 30px rgba(255, 157, 66, 0.4);
+      transform: translateY(-5px);
+    }
+    
+    /* Nav highlight */
+    .nav-link {
+      position: relative;
+      transition: color 0.3s ease;
+    }
+    
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #FF4500, #FF9D42, transparent);
+      transition: width 0.3s ease;
+    }
+    
+    .nav-link:hover::after,
+    .nav-link.active::after {
+      width: 100%;
+    }
+    
+    /* Parallax effect */
+    .parallax-bg {
+      background-attachment: fixed;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+    
+    /* Custom borders */
+    .border-glow {
+      position: relative;
+    }
+    
+    .border-glow::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 1px solid rgba(255, 69, 0, 0.5);
+      box-shadow: 0 0 15px rgba(255, 69, 0, 0.4);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    /* Mobile menu */
+    .mobile-menu {
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+    }
+    
+    .mobile-menu.open {
+      transform: translateX(0);
+    }
+    
+    /* Gallery grid */
+    .masonry-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      grid-gap: 16px;
+      grid-auto-flow: dense;
+    }
+    
+    .masonry-item {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      will-change: transform;
+      cursor: pointer;
+    }
+    
+    .masonry-item:hover {
+      transform: scale(1.03);
+      box-shadow: 0 0 20px rgba(255, 69, 0, 0.6);
+      z-index: 1;
+    }
+    
+    /* Form styling */
+    .form-input {
+      background: rgba(26, 26, 26, 0.8);
+      border: 1px solid #333;
+      color: #fff;
+      transition: all 0.3s ease;
+    }
+    
+    .form-input:focus {
+      border-color: #FF7518;
+      box-shadow: 0 0 0 2px rgba(255, 117, 24, 0.3);
+      outline: none;
+    }
+    
+    /* Logo animation */
+    @keyframes pulse-glow {
+      0%, 100% {
+        filter: drop-shadow(0 0 8px rgba(255, 69, 0, 0.7));
+      }
+      50% {
+        filter: drop-shadow(0 0 16px rgba(255, 157, 66, 0.9));
+      }
+    }
+    
+    .logo-animation {
+      animation: pulse-glow 3s infinite ease-in-out, float 6s infinite ease-in-out;
+    }
+    
+    /* Loading screen */
+    .loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #0A0A0A;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.5s ease-in-out;
+    }
+    
+    .loader {
+      width: 60px;
+      height: 60px;
+      border: 3px solid rgba(255, 157, 66, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid #FF4500;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Image modal */
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .modal.open {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    .modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    
+    .modal.open .modal-content {
+      transform: scale(1);
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: #fff;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 10000;
+    }
+  </style>
+</head>
+
+<body class="font-oxanium text-gray-100">
+  <!-- Loading Screen -->
+  <div class="loading-screen" id="loadingScreen">
+    <div class="loader"></div>
+  </div>
+
+  <!-- Modal for Gallery Images -->
+  <div class="modal" id="imageModal">
+    <div class="modal-close" id="modalClose">
+      <i class="fas fa-times"></i>
+    </div>
+    <img src="" alt="Gallery Image" class="modal-content" id="modalImage">
+  </div>
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 w-full bg-gradient-to-b from-black to-transparent z-50 backdrop-blur-sm">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="#home" class="text-2xl font-orbitron font-bold text-fire">
+        <span class="text-glow">SAN JUAN ÁRA</span>
+      </a>
+      
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex space-x-8">
+        <a href="#home" class="nav-link font-orbitron">INICIO</a>
+        <a href="#story" class="nav-link font-orbitron">PRÓLOGO</a>
+        <a href="#storyboard" class="nav-link font-orbitron">STORYBOARD</a>
+        <a href="#gallery" class="nav-link font-orbitron">GALERÍA</a>
+        <a href="#videos" class="nav-link font-orbitron">VIDEOS</a>
+        <a href="#team" class="nav-link font-orbitron">EQUIPO</a>
+        <a href="#download" class="nav-link font-orbitron">DESCARGAR</a>
+        <a href="#social" class="nav-link font-orbitron">SÍGUENOS</a>
+      </div>
+      
+      <!-- Mobile Menu Button -->
+      <button class="md:hidden text-white focus:outline-none" id="menuToggle">
+        <i class="fas fa-bars text-xl"></i>
+      </button>
+    </div>
+    
+    <!-- Mobile Menu -->
+    <div class="mobile-menu fixed top-0 right-0 h-full w-64 bg-black bg-opacity-95 z-50 p-6" id="mobileMenu">
+      <button class="absolute top-4 right-4 text-white focus:outline-none" id="menuClose">
+        <i class="fas fa-times text-xl"></i>
+      </button>
+      <div class="flex flex-col space-y-6 mt-16">
+        <a href="#home" class="nav-link font-orbitron">INICIO</a>
+        <a href="#story" class="nav-link font-orbitron">PRÓLOGO</a>
+        <a href="#storyboard" class="nav-link font-orbitron">STORYBOARD</a>
+        <a href="#gallery" class="nav-link font-orbitron">GALERÍA</a>
+        <a href="#videos" class="nav-link font-orbitron">VIDEOS</a>
+        <a href="#team" class="nav-link font-orbitron">EQUIPO</a>
+        <a href="#download" class="nav-link font-orbitron">DESCARGAR</a>
+        <a href="#social" class="nav-link font-orbitron">SÍGUENOS</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Home Section -->
+  <section id="home" class="section flex items-center justify-center bg-ash">
+    <div class="ember-particles" id="homeParticles"></div>
+    <div class="container mx-auto px-4 text-center z-10">
+      <div class="flex flex-col items-center justify-center h-full">
+        <img src="Imagenes/Logo.jpg" alt="San Juan Ára Logo" class="w-32 h-32 md:w-48 md:h-48 logo-animation object-contain">
+        
+        <h1 class="mt-8 text-4xl md:text-6xl lg:text-7xl font-orbitron font-bold text-glow text-transparent bg-clip-text bg-gradient-to-r from-fire via-ember to-glow">
+          SAN JUAN ÁRA
+        </h1>
+        
+        <p class="mt-4 text-xl md:text-2xl max-w-2xl text-glow animate-pulse-slow">
+          DONDE LA TRADICIÓN Y LA MAGIA SE FUNDEN
+        </p>
+        
+        <a href="#videos" class="mt-12 px-8 py-4 rounded-full bg-gradient-to-r from-fire to-ember font-orbitron font-bold text-white uppercase tracking-wider btn-glow transition-all">
+          Ver Tráiler <i class="fas fa-play ml-2"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Story Section -->
+  <section id="story" class="section flex items-center bg-char">
+    <div class="ember-particles" id="storyParticles"></div>
+    <div class="container mx-auto px-4 py-16 z-10">
+      <h2 class="text-3xl md:text-4xl font-orbitron font-bold text-center mb-12 text-glow">El Prólogo</h2>
+      
+      <div class="max-w-4xl mx-auto bg-ash bg-opacity-50 p-6 md:p-8 rounded-lg border border-fire border-opacity-30 backdrop-blur-sm">
+        <p class="text-lg md:text-xl mb-6">
+          En la tranquila aldea de Itauguá, donde las tradiciones corren tan profundo como las raíces de los árboles ancestrales, un niño llamado Elio siempre ha sentido curiosidad por los límites de lo prohibido.
+        </p>
+        
+        <p class="text-lg md:text-xl mb-6">
+          la mala junta le  hablan de un templo sagrado en el corazón del bosque, donde los espíritus del San Juan Ára —la antigua celebración del fuego— permanecen dormidos hasta que alguien los despierte.
+        </p>
+        
+        <p class="text-xl md:text-2xl font-medium text-center my-8 px-4 py-3 bg-gradient-to-r from-fire to-ember bg-opacity-20 rounded text-white text-glow">
+          "Aquel que profana lo sagrado, deberá enfrentar las pruebas del fuego para encontrar su camino de regreso."
+        </p>
+        
+        <p class="text-lg md:text-xl">
+          Cuando Elio, desafiando las advertencias, atraviesa las puertas prohibidas y toca el objeto sagrado, es transportado a un mundo paralelo donde la magia del San Juan Ára cobra vida. Ahora deberá superar los desafíos ancestrales para encontrar el camino de regreso a casa.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Storyboard Section -->
+  <section id="storyboard" class="section bg-ash py-16">
+    <div class="ember-particles" id="storyboardParticles"></div>
+    <div class="container mx-auto px-4 z-10">
+      <h2 class="text-3xl md:text-4xl font-orbitron font-bold text-center mb-16 text-glow">Storyboard del Videojuego</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <!-- Contexto Card -->
+        <div class="card-glow bg-char p-6 rounded-lg border border-fire border-opacity-20">
+          <div class="flex items-start">
+            
+            <div>
+              <h3 class="font-orbitron text-xl text-fire mb-2">Contexto del juego</h3>
+              <ul class="space-y-2 text-sm md:text-base">
+                <li><span class="text-ember">•</span> <strong>Género:</strong> Aventura</li>
+                <li><span class="text-ember">•</span> <strong>Ambientación:</strong> Mundo mágico paralelo a la realidad</li>
+                <li><span class="text-ember">•</span> <strong>Historia principal:</strong> Elio, un niño desobediente, entra en un templo, toca un objeto sagrado y es transportado a un mundo mágico inspirado en la fiesta paraguaya San Juan Ára.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Personajes Card -->
+        <div class="card-glow bg-char p-6 rounded-lg border border-fire border-opacity-20">
+          <div class="flex items-start">
+            
+            <div>
+              <h3 class="font-orbitron text-xl text-fire mb-2">Personajes</h3>
+              <ul class="space-y-2 text-sm md:text-base">
+                <li><span class="text-ember">•</span> <strong>Protagonista:</strong> Elio – Niño curioso y desobediente</li>
+                <li><span class="text-ember">•</span> <strong>Amigos:</strong> Solo incitan a entrar al templo</li>
+                <li><span class="text-ember">•</span> <strong>Antagonista:</strong> No hay un enemigo concreto, los obstáculos mágicos actúan como la amenaza principal</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Mecánicas Card -->
+        <div class="card-glow bg-char p-6 rounded-lg border border-fire border-opacity-20">
+          <div class="flex items-start">
+           
+            <div>
+              <h3 class="font-orbitron text-xl text-fire mb-2">Mecánicas de juego</h3>
+              <ul class="space-y-2 text-sm md:text-base">
+                <li><span class="text-ember">•</span> <strong>Acciones:</strong> caminar, saltar, mover la cámara</li>
+                <li><span class="text-ember">•</span> <strong>Enfoque:</strong> primera persona</li>
+                <li><span class="text-ember">•</span> <strong>Obstáculos:</strong> inspirados en los juegos de San Juan Ára</li>
+                <li><span class="text-ember">•</span> No hay objetivos secundarios</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Objetivos Card -->
+        <div class="card-glow bg-char p-6 rounded-lg border border-fire border-opacity-20">
+          <div class="flex items-start">
+            
+            <div>
+              <h3 class="font-orbitron text-xl text-fire mb-2">Objetivo del juego</h3>
+              <ul class="space-y-2 text-sm md:text-base">
+                <li><span class="text-ember">•</span> Revivir los juegos tradicionales del San Juan</li>
+                <li><span class="text-ember">•</span> Transmitir valores de obediencia y respeto</li>
+                <li><span class="text-ember">•</span> Enseñar a no profanar lo sagrado</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section id="gallery" class="section bg-char py-16">
+    <div class="ember-particles" id="galleryParticles"></div>
+    <div class="container mx-auto px-4 z-10">
+      <h2 class="text-3xl md:text-4xl font-orbitron font-bold text-center mb-16 text-glow">Imágenes Promocionales</h2>
+      
+      <div class="masonry-grid">
+        <div class="masonry-item gallery-image">
+          <img src="Imagenes/Nivel 1.jpg" alt="NIVEL 1" class="w-full h-auto rounded-md">
+        </div>
+        <div class="masonry-item gallery-image">
+          <img src="Imagenes/nivel1x2.jpg" alt="Ambiente de juego" class="w-full h-auto rounded-md">
+        </div>
+        <div class="masonry-item gallery-image">
+          <img src="Imagenes/Nivel 2.jpg" alt="Nivel 2" class="w-full h-auto rounded-md">
+        </div>
+        <div class="masonry-item gallery-image">
+          <img src="Imagenes/nivel 3.jpg" alt="Elemento ritual" class="w-full h-auto rounded-md">
+        </div>
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- Videos Section -->
+  <section id="videos" class="section bg-ash py-16">
+    <!-- Trailer -->
+            <div class="mb-8">
+            <h3 class="text-2xl text-glow mb-4">Trailer</h3>
+            <video controls class="mx-auto rounded-lg shadow-lg border-2 border-ember w-full max-w-3xl">
+    <source src="Videos/Trailer.mp4" type="video/mp4">
+    Tu navegador no soporta el video.
+  </video>
+</div>
+
+<div class="text-center mt-6">
+  <h3 class="text-2xl text-glow mb-4">Gameplay</h3>
+  <a href="https://youtu.be/7gtdFGGSXs0" target="_blank">
+    <img src="https://img.youtube.com/vi/7gtdFGGSXs0/hqdefault.jpg" alt="Gameplay Video" class="mx-auto rounded-lg shadow-lg border-2 border-ember hover:scale-105 transition">
+  </a>
+</div>
+
+
+
+
+
+  </section>
+
+  <!-- Team Section -->
+  <section id="team" class="section bg-char py-16">
+    <div class="ember-particles" id="teamParticles"></div>
+    <div class="container mx-auto px-4 z-10">
+      <h2 class="text-3xl md:text-4xl font-orbitron font-bold text-center mb-16 text-glow">Equipo de Desarrollo</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <!-- Team Member 1 -->
+        <div class="bg-ash bg-opacity-50 p-6 rounded-lg border border-fire border-opacity-30 text-center card-glow">
+          <div class="w-24 h-24 mx-auto rounded-full overflow-hidden border-2 border-ember mb-4">
+            <img src="Imagenes/mathi.jpg" alt="Mathias Quintana" class="w-full h-full object-cover">
+          </div>
+          <h3 class="font-orbitron text-xl text-fire mb-1">Mathias Quintana</h3>
+          <p class="text-glow">Animador</p>
+        </div>
+        
+        <!-- Team Member 2 -->
+        <div class="bg-ash bg-opacity-50 p-6 rounded-lg border border-fire border-opacity-30 text-center card-glow">
+          <div class="w-24 h-24 mx-auto rounded-full overflow-hidden border-2 border-ember mb-4">
+            <img src="Imagenes/yo.jpg" alt="Lucas Giménez" class="w-full h-full object-cover">
+          </div>
+          <h3 class="font-orbitron text-xl text-fire mb-1">Lucas Giménez</h3>
+          <p class="text-glow">Programador</p>
+        </div>
+        
+        <!-- Team Member 3 -->
+        <div class="bg-ash bg-opacity-50 p-6 rounded-lg border border-fire border-opacity-30 text-center card-glow">
+          <div class="w-24 h-24 mx-auto rounded-full overflow-hidden border-2 border-ember mb-4">
+                <img src="Imagenes/isa .jpg" alt="Isana Gomez" class="w-full h-full object-cover">
+          </div>
+          <h3 class="font-orbitron text-xl text-fire mb-1">Isana Gómez</h3>
+          <p class="text-glow">Desarrolladora</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Mechanics Section -->
+  <section id="mechanics" class="section bg-ash py-16">
+    <div class="ember-particles" id="mechanicsParticles"></div>
+    <div class="container mx-auto px-4 z-10">
+      <h2 class="text-3xl md:text-4xl font-orbitron font-bold text-center mb-16 text-glow">Gameplay / Mecánicas</h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+        <!-- Walk Mechanic -->
+        <div class="bg-char p-6 rounded-lg text-center card-glow">
+          <div class="w-20 h-20 mx-auto bg-fire bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-walking text-3xl text-fire"></i>
+          </div>
+          <h3 class="font-orbitron text-xl mb-2">Caminar</h3>
+          <p class="text-sm text-gray-300">Explora el mundo místico del San Juan Ára</p>
+        </div>
+        
+        <!-- Jump Mechanic -->
+        <div class="bg-char p-6 rounded-lg text-center card-glow">
+          <div class="w-20 h-20 mx-auto bg-fire bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-arrow-up text-3xl text-fire"></i>
+          </div>
+          <h3 class="font-orbitron text-xl mb-2">Saltar</h3>
+          <p class="text-sm text-gray-300">Supera obstáculos y pruebas tradicionales</p>
+        </div>
+        
+        <!-- Camera Mechanic -->
+        <div class="bg-char p-6 rounded-lg text-center card-glow">
+          <div class="w-20 h-20 mx-auto bg-fire bg-opacity-20 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-camera text-3xl text-fire"></i>
+          </div>
+          <h3 class="font-orbitron text-xl mb-2">Mover Cámara</h3>
+          <p class="text-sm text-gray-300">Observa los detalles del mundo mágico</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+ 
+
+  <section id="download" class="section bg-ash py-16">
+  <div class="ember-particles" id="downloadParticles"></div>
+  <div class="container mx-auto px-4 py-16 z-10">
+    <h2 class="text-3xl md:text-4xl font-orbitron font-bold text-center mb-16 text-glow">Descarga la Demo</h2>
+    
+    <div class="max-w-3xl mx-auto bg-char p-8 rounded-lg border border-fire border-opacity-30">
+      <div class="text-center">
+        <p class="text-xl md:text-2xl mb-8">¡Experimenta la magia del San Juan Ára en tu PC!</p>
+        <a href="https://itch.io/embed/3864711?bg_color=6c0303&amp;fg_color=fad1d1&amp;link_color=e8d400&amp;border_color=d47650" target="_blank" 
+           class="inline-block px-12 py-4 rounded-full bg-gradient-to-r from-fire to-ember font-orbitron font-bold text-white uppercase tracking-wider btn-glow text-lg">
+          Descargar Demo <i class="fas fa-download ml-2"></i>
+        </a>
+
+        <!-- Requisitos Mínimos dentro del mismo bloque -->
+        <div class="mt-12 text-left">
+          <h3 class="font-orbitron text-xl text-fire mb-4">Requisitos Mínimos</h3>
+          <p class="mb-6 text-gray-300">Este juego es extremadamente liviano y puede correr en prácticamente cualquier PC.</p>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-fire bg-opacity-20 flex items-center justify-center mr-3">
+                <i class="fas fa-laptop text-fire"></i>
+              </div>
+              <div>
+                <h4 class="font-medium">Sistema Operativo</h4>
+                <p class="text-sm text-gray-300">Windows 7 o superior</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-fire bg-opacity-20 flex items-center justify-center mr-3">
+                <i class="fas fa-microchip text-fire"></i>
+              </div>
+              <div>
+                <h4 class="font-medium">Procesador</h4>
+                <p class="text-sm text-gray-300">Cualquier Dual Core</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-fire bg-opacity-20 flex items-center justify-center mr-3">
+                <i class="fas fa-memory text-fire"></i>
+              </div>
+              <div>
+                <h4 class="font-medium">Memoria RAM</h4>
+                <p class="text-sm text-gray-300">2 GB</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center">
+              <div class="w-10 h-10 rounded-full bg-fire bg-opacity-20 flex items-center justify-center mr-3">
+                <i class="fas fa-desktop text-fire"></i>
+              </div>
+              <div>
+                <h4 class="font-medium">Gráficos</h4>
+                <p class="text-sm text-gray-300">Integrados</p>
+              </div>
+            </div>
+            
+            <div class="flex items-center md:col-span-2">
+              <div class="w-10 h-10 rounded-full bg-fire bg-opacity-20 flex items-center justify-center mr-3">
+                <i class="fas fa-hdd text-fire"></i>
+              </div>
+              <div>
+                <h4 class="font-medium">Espacio en disco</h4>
+                <p class="text-sm text-gray-300">200 MB</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div> <!-- cierre text-center -->
+    </div>
+  </div>
+</section>
+
+
+  <!-- Contact Section -->
+  <section id="social" class="section bg-char py-16">
+    <div class="ember-particles" id="contactParticles"></div>
+    <div class="container mx-auto px-4 z-10">
+      <h2 class="text-3xl md:text-4xl font-orbitron font-bold text-center mb-16 text-glow">Síguenos</h2>
+      
+      <div class="max-w-2xl mx-auto">
+        <!-- Social Media -->
+        <div class="bg-ash bg-opacity-50 p-6 rounded-lg border border-fire border-opacity-30 flex flex-col items-center justify-center">
+          <div class="text-center mb-8">
+            <a href="#social" class="inline-block p-4 bg-gradient-to-r from-fire to-ember bg-opacity-20 rounded-full btn-glow">
+              <i class="fab fa-instagram text-4xl"></i>
+            </a>
+            <p class="mt-4 text-sm">@Enri_.quint</p>
+          </div>
+          
+          <div class="mt-4 text-center">
+            <p>Para más información o colaboraciones:</p>
+            <p class="text-fire text-lg mt-2">Enriquequint21@gmail.com</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-black py-8">
+    <div class="container mx-auto px-4 text-center">
+      <p class="text-sm text-gray-500">&copy; 2025 San Juan Ára - Todos los derechos reservados</p>
+      <p class="text-xs text-gray-600 mt-2">Un videojuego que celebra la cultura paraguaya</p>
+    </div>
+  </footer>
+
+  <script id="app-script">
+    // Loading Screen
+    window.addEventListener('load', function() {
+      setTimeout(() => {
+        const loadingScreen = document.getElementById('loadingScreen');
+        loadingScreen.style.opacity = '0';
+        setTimeout(() => {
+          loadingScreen.style.display = 'none';
+        }, 500);
+      }, 1500);
+    });
+
+    // Mobile Menu
+    document.getElementById('menuToggle').addEventListener('click', function() {
+      document.getElementById('mobileMenu').classList.add('open');
+    });
+
+    document.getElementById('menuClose').addEventListener('click', function() {
+      document.getElementById('mobileMenu').classList.remove('open');
+    });
+
+    // All nav links
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('click', function(e) {
+        // Close mobile menu when a nav link is clicked
+        document.getElementById('mobileMenu').classList.remove('open');
+        
+        // The default anchor behavior will handle the smooth scrolling
+        // No need for e.preventDefault() since we want the native anchor behavior
+      });
+    });
+
+    // Active nav link highlighting
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    function highlightNavOnScroll() {
+      const scrollPos = window.pageYOffset + 100;
+      
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        const sectionId = section.getAttribute('id');
+        
+        if (scrollPos >= sectionTop && scrollPos < sectionTop + sectionHeight) {
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === '#' + sectionId) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }
+
+    window.addEventListener('scroll', highlightNavOnScroll);
+    highlightNavOnScroll(); // Call on load
+
+    // Ember Particles
+    function createEmberParticles(containerId) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
+      const maxParticles = 20;
+      
+      for (let i = 0; i < maxParticles; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('ember');
+        
+        // Random size
+        const size = Math.random() * 8 + 4;
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        
+        // Random position
+        const posX = Math.random() * 100;
+        const posY = Math.random() * 100;
+        particle.style.left = `${posX}%`;
+        particle.style.top = `${posY}%`;
+        
+        // Random animation duration
+        const duration = Math.random() * 8 + 12;
+        particle.style.animationDuration = `${duration}s`;
+        
+        // Random delay
+        const delay = Math.random() * 6;
+        particle.style.animationDelay = `${delay}s`;
+        
+        container.appendChild(particle);
+      }
+    }
+
+    // Initialize particles for all sections
+    const particleContainers = [
+      'homeParticles', 
+      'storyParticles', 
+      'storyboardParticles',
+      'galleryParticles',
+      'videosParticles',
+      'teamParticles',
+      'mechanicsParticles',
+      'worldParticles',
+      'downloadParticles',
+      'contactParticles'  // You can keep this as is or rename to 'socialParticles'
+    ];
+    
+    particleContainers.forEach(containerId => {
+      createEmberParticles(containerId);
+    });
+
+    // Gallery Image Modal
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalClose = document.getElementById('modalClose');
+    
+    document.querySelectorAll('.gallery-image').forEach(image => {
+      image.addEventListener('click', function() {
+        const imgSrc = this.querySelector('img').src;
+        modalImage.src = imgSrc;
+        modal.classList.add('open');
+      });
+    });
+    
+    modalClose.addEventListener('click', function() {
+      modal.classList.remove('open');
+    });
+    
+    window.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        modal.classList.remove('open');
+      }
+    });
+  </script>
+</body>
+</html>
